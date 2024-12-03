@@ -1,0 +1,80 @@
+name: Gamlendar Game Notification Workflow
+
+on:
+  schedule:
+    -cron: '0 0 * * *' #매일 오전 9시 실행
+
+jobs:
+  run_python_script:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 리포지토리 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Python 설치
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 의존성 설치
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # VPN 설치 및 연결
+      - name: VPN Setup & Connect
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y strongswan xl2tpd ppp
+
+          
+          echo ": PSK '${{ secrets.VPN_PSK }}'" | sudo tee /etc/ipsec.secrets
+          echo "
+          conn myvpn
+            authby=secret
+            auto=start
+            keyexchange=ikev1
+            left=%defaultroute
+            leftauth=psk
+            right=${{ secrets.VPN_SERVER }}
+            rightauth=psk
+            rightsubnet=0.0.0.0/0
+          " | sudo tee /etc/ipsec.conf
+
+          sudo ipsec restart
+
+          
+          echo "
+          [lac myvpn]
+          lns = ${{ secrets.VPN_SERVER }}
+          pppoptfile = /etc/ppp/options.l2tpd.client
+          length bit = yes
+          " | sudo tee /etc/xl2tpd/xl2tpd.conf
+
+          echo "
+          require-mschap-v2
+          refuse-eap
+          refuse-pap
+          require-authentication
+          user '${{ secrets.VPN_USERNAME }}'
+          password '${{ secrets.VPN_PASSWORD }}'
+          " | sudo tee /etc/ppp/options.l2tpd.client
+
+          sudo systemctl restart xl2tpd
+          sudo ipsec up myvpn
+          sudo xl2tpd-control connect myvpn
+
+          
+          ip a
+
+      # main.py 실행
+      - name: Run Python script
+        env:
+          REDIS_CACHE_HOST: ${{secrets.REDIS_CACHE_HOST}}
+          REDIS_CACHE_PORT: ${{secrets.REDIS_CACHE_PORT}}
+          REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
+        run: python main.py
