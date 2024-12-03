@@ -19,7 +19,7 @@ def initializeFirebase():
 
 def key_prefix_dateList(date):
     key_prefix = reDB.keys(f"{date}:*") 
-    #print(key_prefix)
+    
     return key_prefix
 
 def id_game_prefix(user_gameList: list):
