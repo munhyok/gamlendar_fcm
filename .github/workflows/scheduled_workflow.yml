@@ -123,12 +123,14 @@ jobs:
         run: |
           
           echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
-          sleep 15
+          
 
           
 
       - name: Add routing table
         run: |
+
+          sleep 15
           
           PPP_IP=$(ip -4 addr show ppp0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
           echo "PPP IP Address: $PPP_IP"
