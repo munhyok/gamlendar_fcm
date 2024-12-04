@@ -122,7 +122,7 @@ jobs:
       - name: Start VPN connection
         run: |
           while ! ip a | grep -q "ppp0"; do
-            echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
+            echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control || echo "VPN start failed"
             sleep 10
           done
 
@@ -165,7 +165,6 @@ jobs:
           REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
         
         run: |
-          trap 'echo "d myvpn" | sudo tee /var/run/xl2tpd/l2tp-control' EXIT
           python main.py
 
       - name: Remove serviceAccountKey
