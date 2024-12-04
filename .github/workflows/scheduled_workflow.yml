@@ -117,8 +117,13 @@ jobs:
 
       - name: Start VPN connection
         run: |
-          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
-          sleep 5
+          
+          if ! ip a | grep -q "ppp0"; then
+            echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
+            sleep 10
+          else
+            echo "VPN is already connected"
+          fi
 
       - name: Add routing table
         run: |
