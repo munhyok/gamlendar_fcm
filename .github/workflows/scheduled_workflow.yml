@@ -125,10 +125,12 @@ jobs:
         run: |
           
           echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
+          sleep 10
           
 
       - name: Verify VPN connection
         run: |
+          
           ip a
           ip route
 
