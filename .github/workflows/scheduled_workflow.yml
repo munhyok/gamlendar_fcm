@@ -155,7 +155,10 @@ jobs:
           REDIS_CACHE_HOST: ${{secrets.REDIS_CACHE_HOST}}
           REDIS_CACHE_PORT: ${{secrets.REDIS_CACHE_PORT}}
           REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
-        run: python main.py
+        
+        run: |
+          trap 'echo "d myvpn" | sudo tee /var/run/xl2tpd/l2tp-control' EXIT
+          python main.py
 
-      - name: Remove credentials
-        run: rm -rf credentials
+      - name: Remove serviceAccountKey
+        run: rm -rf serviceAccountKey.json
