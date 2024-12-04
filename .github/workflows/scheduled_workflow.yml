@@ -76,7 +76,7 @@ jobs:
           VPN_USER: ${{ secrets.VPN_USER }}
           VPN_PASSWORD: ${{ secrets.VPN_PASSWORD }}
         run: |
-          cat > /etc/xl2tpd/xl2tpd.conf <<EOF
+          sudo cat > /etc/xl2tpd/xl2tpd.conf <<EOF
           [lac myvpn]
           lns = $VPN_SERVER_IP
           ppp debug = yes
