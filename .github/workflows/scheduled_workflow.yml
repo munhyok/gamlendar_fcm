@@ -132,7 +132,7 @@ jobs:
       - name: Verify VPN connection
         run: |
 
-          sudo route add -net 192.168.100.211 netmask 255.255.255.0 gw 192.168.0.1
+          sudo route add -net 192.168.100.211 gw 192.168.0.1
           
 
           
