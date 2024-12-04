@@ -3,7 +3,7 @@ name: Gamlendar Game Notification Workflow
 on:
   push:
     branches:
-    - main
+      - main
 #   schedule:
 #     - cron: "0 0 * * *" #매일 오전 9시 실행
 
@@ -34,7 +34,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y strongswan xl2tpd ppp
 
-          
+          # IPsec 설정
           echo ": PSK '${{ secrets.VPN_PSK }}'" | sudo tee /etc/ipsec.secrets
           echo "
           conn myvpn
@@ -50,7 +50,7 @@ jobs:
 
           sudo ipsec restart
 
-          
+          # xl2tpd 설정
           echo "
           [lac myvpn]
           lns = ${{ secrets.VPN_SERVER }}
@@ -68,10 +68,14 @@ jobs:
           " | sudo tee /etc/ppp/options.l2tpd.client
 
           sudo systemctl restart xl2tpd
-          sudo ipsec up myvpn
-          sudo xl2tpd-control connect myvpn
 
-          
+          # IPsec 연결 시작
+          sudo ipsec up myvpn
+
+          # xl2tpd 연결 시작 (수정된 명령 사용)
+          sudo xl2tpd-control connect-lac myvpn
+
+          # 네트워크 상태 확인
           ip a
 
       # main.py 실행
