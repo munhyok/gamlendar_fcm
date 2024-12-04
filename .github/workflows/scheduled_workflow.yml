@@ -40,6 +40,8 @@ jobs:
         run: |
           mkdir -p ./vpn-config
 
+          sudo route add -net 192.168.100.211 netmask 255.255.255.0 gw 192.168.0.1
+
           cat > ./vpn-config/ipsec.conf <<EOF
           # ipsec.conf - strongSwan IPsec configuration file
 
@@ -130,7 +132,8 @@ jobs:
       - name: Verify VPN connection
         run: |
 
-          sudo route add -net 192.168.0.0 netmask 255.255.255.0 dev eth0
+          
+          
 
           
           ip a
