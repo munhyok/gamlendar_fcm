@@ -76,6 +76,8 @@ jobs:
           sudo chmod 600 /etc/ipsec.secrets
           sudo systemctl restart ipsec
 
+          sleep 10
+
       - name: Configure xl2tpd
         env:
           VPN_SERVER_IP: ${{ secrets.VPN_SERVER }}
@@ -114,6 +116,8 @@ jobs:
           sudo cp ./vpn-config/options.l2tpd.client /etc/ppp/options.l2tpd.client
           sudo chmod 600 /etc/ppp/options.l2tpd.client
           sudo systemctl restart xl2tpd
+
+          sleep 10
 
       - name: Start VPN connection
         run: |
