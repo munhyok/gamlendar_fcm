@@ -121,10 +121,9 @@ jobs:
 
       - name: Start VPN connection
         run: |
-          while ! ip a | grep -q "ppp0"; do
-            echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control || echo "VPN start failed"
-            sleep 10
-          done
+          
+          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control || echo "VPN start failed"
+          
 
           
 
