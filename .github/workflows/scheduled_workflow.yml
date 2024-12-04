@@ -119,10 +119,6 @@ jobs:
 
           sleep 10
 
-      - name: Configure sudoers to not require a password
-        run: |
-          echo "$(whoami) ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$(whoami)
-
 
       - name: Start VPN connection
         run: |
@@ -134,8 +130,7 @@ jobs:
         run: |
           sleep 10
 
-          ip route add 192.168.0.0/24 via 192.168.0.1 dev ppp0
-          ip route add default via 192.168.0.1 dev ppp0
+          
 
           ip a
           ip route
