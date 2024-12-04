@@ -120,6 +120,23 @@ jobs:
           echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
           sleep 5
 
+      - name: Add routing table
+        run: |
+          
+          PPP_IP=$(ip -4 addr show ppp0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+          echo "PPP IP Address: $PPP_IP"
+
+          
+          GATEWAY=192.168.0.1
+          echo "Setting gateway: $GATEWAY"
+
+          
+          sudo route add -net 192.168.0.0 netmask 255.255.255.0 gw $GATEWAY dev ppp0
+          sudo route add -net 0.0.0.0 netmask 0.0.0.0 gw $GATEWAY dev ppp0
+
+          
+          ip route
+
       - name: Verify VPN connection
         run: |
           ip a
