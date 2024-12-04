@@ -98,9 +98,7 @@ jobs:
           REDIS_CACHE_HOST: ${{secrets.REDIS_CACHE_HOST}}
           REDIS_CACHE_PORT: ${{secrets.REDIS_CACHE_PORT}}
           REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
-        run: |
-          cd ..
-          python main.py
+        run: python main.py
 
 
       - name: Remove credentials
