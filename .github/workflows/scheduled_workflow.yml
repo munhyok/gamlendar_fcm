@@ -149,7 +149,9 @@ jobs:
           json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
 
 
-        run: sleep 10
+      - name: wait 10 sec
+        run: |
+          sleep 10
 
       # main.py 실행
       - name: Run Python script
