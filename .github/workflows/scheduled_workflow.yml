@@ -132,14 +132,15 @@ jobs:
           ip route
 
       - name: Add routing table
+        env: 
+          GATEWAY: 192.168.0.1
+          PPP_IP: $(ip -4 addr show ppp0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
         run: |
-
           
-          PPP_IP=$(ip -4 addr show ppp0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
           echo "PPP IP Address: $PPP_IP"
 
           
-          GATEWAY=192.168.0.1
+          
           echo "Setting gateway: $GATEWAY"
 
           echo "Running sudo ip route add..."
