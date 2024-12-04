@@ -133,9 +133,7 @@ jobs:
         run: |
 
           
-          #sudo route add -host ${{secrets.REDIS_CACHE_HOST}} gw 192.168.0.1
-          sudo route del default
-          sudo route add default gw 192.168.0.1 dev ppp0
+          sudo route add -host ${{secrets.REDIS_CACHE_HOST}} gw 192.168.0.1
 
           
           ip a
@@ -149,6 +147,9 @@ jobs:
         with:
           name: "serviceAccountKey.json"
           json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
+
+        run: sleep 10
 
       # main.py 실행
       - name: Run Python script
