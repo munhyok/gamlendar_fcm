@@ -70,17 +70,25 @@ jobs:
           : PSK "$VPN_PSK"
           EOF
 
+          
+          sudo cp ./vpn-config/ipsec.conf /etc/ipsec.conf
+          sudo cp ./vpn-config/ipsec.secrets /etc/ipsec.secrets
+          sudo chmod 600 /etc/ipsec.secrets
+          sudo systemctl restart strongswan
+
       - name: Configure xl2tpd
         env:
           VPN_SERVER_IP: ${{ secrets.VPN_SERVER }}
           VPN_USER: ${{ secrets.VPN_USERNAME }}
           VPN_PASSWORD: ${{ secrets.VPN_PASSWORD }}
         run: |
+          mkdir -p ./vpn-config
+
           cat > ./vpn-config/xl2tpd.conf <<EOF
           [lac myvpn]
           lns = $VPN_SERVER_IP
           ppp debug = yes
-          pppoptfile = ./vpn-config/options.l2tpd.client
+          pppoptfile = /etc/ppp/options.l2tpd.client
           length bit = yes
           EOF
 
@@ -101,19 +109,21 @@ jobs:
           password $VPN_PASSWORD
           EOF
 
-      - name: Verify configurations
+          
+          sudo cp ./vpn-config/xl2tpd.conf /etc/xl2tpd/xl2tpd.conf
+          sudo cp ./vpn-config/options.l2tpd.client /etc/ppp/options.l2tpd.client
+          sudo chmod 600 /etc/ppp/options.l2tpd.client
+          sudo systemctl restart xl2tpd
+
+      - name: Start VPN connection
         run: |
-          echo "IPsec configuration:"
-          cat ./vpn-config/ipsec.conf
+          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
+          sleep 5
 
-          echo "IPsec secrets:"
-          cat ./vpn-config/ipsec.secrets
-
-          echo "xl2tpd configuration:"
-          cat ./vpn-config/xl2tpd.conf
-
-          echo "PPP options:"
-          cat ./vpn-config/options.l2tpd.client
+      - name: Verify VPN connection
+        run: |
+          ip a
+          ip route
 
       - name: create-json
         id: create-json
