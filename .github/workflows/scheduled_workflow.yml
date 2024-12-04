@@ -74,7 +74,7 @@ jobs:
           sudo cp ./vpn-config/ipsec.conf /etc/ipsec.conf
           sudo cp ./vpn-config/ipsec.secrets /etc/ipsec.secrets
           sudo chmod 600 /etc/ipsec.secrets
-          sudo systemctl restart strongswan
+          sudo systemctl restart ipsec
 
       - name: Configure xl2tpd
         env:
