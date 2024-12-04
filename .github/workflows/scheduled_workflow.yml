@@ -86,6 +86,7 @@ jobs:
         run: |
           mkdir -p ./vpn-config
 
+          
           cat > ./vpn-config/xl2tpd.conf <<EOF
           [lac myvpn]
           lns = $VPN_SERVER_IP
@@ -103,7 +104,8 @@ jobs:
           noauth
           mtu 1280
           mru 1280
-          noipdefault
+          
+          defaultroute
           usepeerdns
           connect-delay 5000
           name $VPN_USER
