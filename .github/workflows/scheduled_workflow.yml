@@ -86,7 +86,8 @@ jobs:
           # 이 단계에서 JSON 형식으로 변환
           jq -r . < credentials/serviceAccountKey.json > credentials/serviceAccountKey.json
 
-      
+      - name: Debug JSON file
+        run: cat ./credentials/serviceAccountKey.json
 
       # main.py 실행
       - name: Run Python script
