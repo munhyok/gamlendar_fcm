@@ -13,7 +13,8 @@ def initializeToday():
     return formatted_date
 
 def initializeFirebase():
-    cred = credentials.Certificate("./credentials/serviceAccountKey.json")
+    #cred = credentials.Certificate("./credentials/serviceAccountKey.json")
+    cred = credentials.Certificate("./serviceAccountKey.json")
     firebase_admin.initialize_app(cred)
     print('firebase initialized')
 
