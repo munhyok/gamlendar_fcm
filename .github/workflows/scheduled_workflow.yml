@@ -1,6 +1,9 @@
 name: Gamlendar Game Notification Workflow
 
 on:
+  push:
+    branches:
+    - main
 #   schedule:
 #     - cron: "0 0 * * *" #매일 오전 9시 실행
 
