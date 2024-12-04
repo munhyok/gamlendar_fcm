@@ -83,6 +83,7 @@ jobs:
         run: |
           mkdir -p credentials
           cd credentials
+          ls
 
       - name: create-json
         id: create-json
