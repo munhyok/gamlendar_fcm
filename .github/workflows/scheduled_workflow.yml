@@ -119,6 +119,11 @@ jobs:
 
           sleep 10
 
+      - name: Configure sudoers to not require a password
+        run: |
+          echo "$(whoami) ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$(whoami)
+
+
       - name: Start VPN connection
         run: |
           
