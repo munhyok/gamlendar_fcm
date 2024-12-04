@@ -38,7 +38,7 @@ jobs:
           VPN_SERVER_IP: ${{ secrets.VPN_SERVER_IP }}
           VPN_IPSEC_PSK: ${{ secrets.VPN_PSK }}
         run: |
-          cat > /etc/ipsec.conf <<EOF
+          sudo cat > /etc/ipsec.conf <<EOF
           # ipsec.conf - strongSwan IPsec configuration file
 
           config setup
@@ -64,7 +64,7 @@ jobs:
             right=$VPN_SERVER_IP
           EOF
 
-          cat > /etc/ipsec.secrets <<EOF
+          sudo cat > /etc/ipsec.secrets <<EOF
           : PSK "$VPN_PSK"
           EOF
 
@@ -84,7 +84,7 @@ jobs:
           length bit = yes
           EOF
 
-          cat > /etc/ppp/options.l2tpd.client <<EOF
+          sudo cat > /etc/ppp/options.l2tpd.client <<EOF
           ipcp-accept-local
           ipcp-accept-remote
           refuse-eap
