@@ -129,8 +129,8 @@ jobs:
         run: |
           sleep 10
 
-          sudo ip route add 192.168.0.0/24 via 192.168.0.1 dev ppp0
-          sudo ip route add default via 192.168.0.1 dev ppp0
+          ip route add 192.168.0.0/24 via 192.168.0.1 dev ppp0
+          ip route add default via 192.168.0.1 dev ppp0
 
           ip a
           ip route
