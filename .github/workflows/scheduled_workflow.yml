@@ -84,6 +84,9 @@ jobs:
           mkdir -p credentials
           echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" > credentials/serviceAccountKey.json
 
+      - name: Debug JSON file
+        run: cat ./credentials/serviceAccountKey.json
+
       # main.py 실행
       - name: Run Python script
         env:
