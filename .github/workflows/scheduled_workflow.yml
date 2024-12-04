@@ -132,7 +132,9 @@ jobs:
       - name: Verify VPN connection
         run: |
 
-          sudo route add -host 192.168.100.211 gw 192.168.0.1
+          
+          sudo route add -host ${{secrets.REDIS_CACHE_HOST}} gw 192.168.0.1
+
           
           ip a
           ip route
