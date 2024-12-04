@@ -122,8 +122,8 @@ jobs:
       - name: Start VPN connection
         run: |
           
-          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control || echo "VPN start failed"
-          sleep 5
+          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
+          sleep 10
 
           
 
