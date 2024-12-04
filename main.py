@@ -3,6 +3,7 @@ from firebase_admin import credentials, messaging
 from src.redis_conn import reDB
 from datetime import datetime
 import pytz
+import json
 
 
 def initializeToday():
@@ -93,6 +94,9 @@ def send_all_msg(messageList):
 
         
 def main():
+    
+    with open('./credentials/serviceAccountKey.json', 'r') as f:
+        data = json.load(f)  # JSONDecodeError 발생 시 JSON 내용 확인
     messageList = []
     
     today = initializeToday()
