@@ -28,55 +28,100 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # VPN 설치 및 연결
-      - name: VPN Setup & Connect
+      - name: Set up strongSwan dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y strongswan xl2tpd ppp
+          sudo apt-get -y install strongswan xl2tpd
 
-          # IPsec 설정
-          echo ": PSK '${{ secrets.VPN_PSK }}'" | sudo tee /etc/ipsec.secrets
-          echo "
-          conn myvpn
+      - name: Configure strongSwan
+        env:
+          VPN_SERVER_IP: ${{ secrets.VPN_SERVER_IP }}
+          VPN_IPSEC_PSK: ${{ secrets.VPN_PSK }}
+        run: |
+          cat > /etc/ipsec.conf <<EOF
+          # ipsec.conf - strongSwan IPsec configuration file
+
+          config setup
+
+          conn %default
+            ikelifetime=60m
+            keylife=20m
+            rekeymargin=3m
+            keyingtries=1
+            keyexchange=ikev1
             authby=secret
-            auto=start
+            ike=aes256-sha1-modp2048,aes128-sha1-modp2048!
+            esp=aes256-sha1-modp2048,aes128-sha1-modp2048!
+
+          conn myvpn
             keyexchange=ikev1
             left=%defaultroute
-            leftauth=psk
-            right=${{ secrets.VPN_SERVER }}
-            rightauth=psk
-            rightsubnet=0.0.0.0/0
-          " | sudo tee /etc/ipsec.conf
+            auto=add
+            authby=secret
+            type=transport
+            leftprotoport=17/1701
+            rightprotoport=17/1701
+            right=$VPN_SERVER_IP
+          EOF
 
-          sudo ipsec restart
+          cat > /etc/ipsec.secrets <<EOF
+          : PSK "$VPN_PSK"
+          EOF
 
-          # xl2tpd 설정
-          echo "
+          sudo chmod 600 /etc/ipsec.secrets
+
+      - name: Configure xl2tpd
+        env:
+          VPN_SERVER_IP: ${{ secrets.VPN_SERVER_IP }}
+          VPN_USER: ${{ secrets.VPN_USER }}
+          VPN_PASSWORD: ${{ secrets.VPN_PASSWORD }}
+        run: |
+          cat > /etc/xl2tpd/xl2tpd.conf <<EOF
           [lac myvpn]
-          lns = ${{ secrets.VPN_SERVER }}
+          lns = $VPN_SERVER_IP
+          ppp debug = yes
           pppoptfile = /etc/ppp/options.l2tpd.client
           length bit = yes
-          " | sudo tee /etc/xl2tpd/xl2tpd.conf
+          EOF
 
-          echo "
-          require-mschap-v2
+          cat > /etc/ppp/options.l2tpd.client <<EOF
+          ipcp-accept-local
+          ipcp-accept-remote
           refuse-eap
-          refuse-pap
-          require-authentication
-          user '${{ secrets.VPN_USERNAME }}'
-          password '${{ secrets.VPN_PASSWORD }}'
-          " | sudo tee /etc/ppp/options.l2tpd.client
+          require-chap
+          noccp
+          noauth
+          mtu 1280
+          mru 1280
+          noipdefault
+          defaultroute
+          usepeerdns
+          connect-delay 5000
+          name $VPN_USER
+          password $VPN_PASSWORD
+          EOF
 
+          sudo chmod 600 /etc/ppp/options.l2tpd.client
+
+      - name: Restart services
+        run: |
+          sudo systemctl restart strongswan
           sudo systemctl restart xl2tpd
 
-          # IPsec 연결 시작
-          sudo ipsec up myvpn
+      - name: Start VPN connection
+        run: |
+          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
+          sleep 5
 
-          # xl2tpd 연결 시작 (수정된 명령 사용)
-          sudo xl2tpd-control connect-lac myvpn
+      - name: Add routes
+        run: |
+          VPN_SERVER_IP=${{ secrets.VPN_SERVER_IP }}
+          YOUR_LOCAL_PC_PUBLIC_IP=$(wget -qO- http://ipv4.icanhazip.com)
 
-          # 네트워크 상태 확인
-          ip a
+          sudo route add $VPN_SERVER_IP gw $(ip route | grep "default via" | grep -o '[0-9.]\+' | head -1)
+          sudo route add $YOUR_LOCAL_PC_PUBLIC_IP gw $(ip route | grep "default via" | grep -o '[0-9.]\+' | head -1)
+          sudo route add -net 192.168.0.0/24 gw 192.168.0.1
+          echo "Routes added"
 
 
       - name: create-json
