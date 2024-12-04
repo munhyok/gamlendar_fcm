@@ -1,8 +1,8 @@
 name: Gamlendar Game Notification Workflow
 
-on:
-  schedule:
-    - cron: "0 0 * * *" #매일 오전 9시 실행
+# on:
+#   schedule:
+#     - cron: "0 0 * * *" #매일 오전 9시 실행
 
 jobs:
   run_python_script:
