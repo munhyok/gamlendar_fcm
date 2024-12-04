@@ -35,10 +35,12 @@ jobs:
 
       - name: Configure strongSwan
         env:
-          VPN_SERVER_IP: ${{ secrets.VPN_SERVER_IP }}
-          VPN_IPSEC_PSK: ${{ secrets.VPN_PSK }}
+          VPN_SERVER_IP: ${{ secrets.VPN_SERVER }}
+          VPN_PSK: ${{ secrets.VPN_PSK }}
         run: |
-          sudo cat > /etc/ipsec.conf <<EOF
+          mkdir -p ./vpn-config
+
+          cat > ./vpn-config/ipsec.conf <<EOF
           # ipsec.conf - strongSwan IPsec configuration file
 
           config setup
@@ -64,27 +66,25 @@ jobs:
             right=$VPN_SERVER_IP
           EOF
 
-          sudo cat > /etc/ipsec.secrets <<EOF
+          cat > ./vpn-config/ipsec.secrets <<EOF
           : PSK "$VPN_PSK"
           EOF
 
-          sudo chmod 600 /etc/ipsec.secrets
-
       - name: Configure xl2tpd
         env:
-          VPN_SERVER_IP: ${{ secrets.VPN_SERVER_IP }}
-          VPN_USER: ${{ secrets.VPN_USER }}
+          VPN_SERVER_IP: ${{ secrets.VPN_SERVER }}
+          VPN_USER: ${{ secrets.VPN_USERNAME }}
           VPN_PASSWORD: ${{ secrets.VPN_PASSWORD }}
         run: |
-          sudo cat > /etc/xl2tpd/xl2tpd.conf <<EOF
+          cat > ./vpn-config/xl2tpd.conf <<EOF
           [lac myvpn]
           lns = $VPN_SERVER_IP
           ppp debug = yes
-          pppoptfile = /etc/ppp/options.l2tpd.client
+          pppoptfile = ./vpn-config/options.l2tpd.client
           length bit = yes
           EOF
 
-          sudo cat > /etc/ppp/options.l2tpd.client <<EOF
+          cat > ./vpn-config/options.l2tpd.client <<EOF
           ipcp-accept-local
           ipcp-accept-remote
           refuse-eap
@@ -101,28 +101,19 @@ jobs:
           password $VPN_PASSWORD
           EOF
 
-          sudo chmod 600 /etc/ppp/options.l2tpd.client
-
-      - name: Restart services
+      - name: Verify configurations
         run: |
-          sudo systemctl restart strongswan
-          sudo systemctl restart xl2tpd
+          echo "IPsec configuration:"
+          cat ./vpn-config/ipsec.conf
 
-      - name: Start VPN connection
-        run: |
-          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
-          sleep 5
+          echo "IPsec secrets:"
+          cat ./vpn-config/ipsec.secrets
 
-      - name: Add routes
-        run: |
-          VPN_SERVER_IP=${{ secrets.VPN_SERVER_IP }}
-          YOUR_LOCAL_PC_PUBLIC_IP=$(wget -qO- http://ipv4.icanhazip.com)
+          echo "xl2tpd configuration:"
+          cat ./vpn-config/xl2tpd.conf
 
-          sudo route add $VPN_SERVER_IP gw $(ip route | grep "default via" | grep -o '[0-9.]\+' | head -1)
-          sudo route add $YOUR_LOCAL_PC_PUBLIC_IP gw $(ip route | grep "default via" | grep -o '[0-9.]\+' | head -1)
-          sudo route add -net 192.168.0.0/24 gw 192.168.0.1
-          echo "Routes added"
-
+          echo "PPP options:"
+          cat ./vpn-config/options.l2tpd.client
 
       - name: create-json
         id: create-json
@@ -131,7 +122,6 @@ jobs:
           name: "serviceAccountKey.json"
           json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
 
-
       # main.py 실행
       - name: Run Python script
         env:
@@ -139,7 +129,6 @@ jobs:
           REDIS_CACHE_PORT: ${{secrets.REDIS_CACHE_PORT}}
           REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
         run: python main.py
-
 
       - name: Remove credentials
         run: rm -rf credentials
