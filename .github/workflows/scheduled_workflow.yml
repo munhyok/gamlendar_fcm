@@ -143,6 +143,7 @@ jobs:
           echo "Setting gateway: $GATEWAY"
 
           echo "Running sudo ip route add..."
+          sudo ip route add 192.168.0.0/24 via $GATEWAY dev ppp0 || { echo "Error adding route"; exit 1; }
           sudo ip route add default via $GATEWAY dev ppp0 || { echo "Error adding default route"; exit 1; }
 
           
