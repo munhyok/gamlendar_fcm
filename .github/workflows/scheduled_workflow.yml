@@ -78,6 +78,12 @@ jobs:
           # 네트워크 상태 확인
           ip a
 
+      # credentials 폴더 생성 및 serviceAccountKey.json 파일 생성
+      - name: Create credentials folder and serviceAccountKey.json
+        run: |
+          mkdir -p credentials
+          echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" > credentials/serviceAccountKey.json
+
       # main.py 실행
       - name: Run Python script
         env:
@@ -85,3 +91,7 @@ jobs:
           REDIS_CACHE_PORT: ${{secrets.REDIS_CACHE_PORT}}
           REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
         run: python main.py
+
+
+      - name: Remove credentials
+        run: rm -rf credentials
