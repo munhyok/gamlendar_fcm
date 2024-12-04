@@ -128,27 +128,14 @@ jobs:
       - name: Verify VPN connection
         run: |
           sleep 10
+
+          sudo ip route add 192.168.0.0/24 via 192.168.0.1 dev ppp0
+          sudo ip route add default via 192.168.0.1 dev ppp0
+
           ip a
           ip route
 
-      - name: Add routing table
-        env: 
-          GATEWAY: 192.168.0.1
-          PPP_IP: $(ip -4 addr show ppp0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
-        run: |
-          
-          echo "PPP IP Address: $PPP_IP"
-
-          
-          
-          echo "Setting gateway: $GATEWAY"
-
-          echo "Running sudo ip route add..."
-          sudo ip route add 192.168.0.0/24 via $GATEWAY dev ppp0 || { echo "Error adding route"; exit 1; }
-          sudo ip route add default via $GATEWAY dev ppp0 || { echo "Error adding default route"; exit 1; }
-
-          
-          ip route
+      
 
       - name: create-json
         id: create-json
