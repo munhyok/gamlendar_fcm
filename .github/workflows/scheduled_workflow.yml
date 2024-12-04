@@ -82,12 +82,15 @@ jobs:
       - name: Create credentials folder and serviceAccountKey.json
         run: |
           mkdir -p credentials
-          echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" | sed 's/\\n/\n/g' > credentials/serviceAccountKey.json
-          # 이 단계에서 JSON 형식으로 변환
-          jq -r . < credentials/serviceAccountKey.json > credentials/serviceAccountKey.json
+          cd credentials
 
-      - name: Debug JSON file
-        run: cat ./credentials/serviceAccountKey.json
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "serviceAccountKey.json"
+          json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
 
       # main.py 실행
       - name: Run Python script
@@ -95,7 +98,9 @@ jobs:
           REDIS_CACHE_HOST: ${{secrets.REDIS_CACHE_HOST}}
           REDIS_CACHE_PORT: ${{secrets.REDIS_CACHE_PORT}}
           REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
-        run: python main.py
+        run: |
+          cd ..
+          python main.py
 
 
       - name: Remove credentials
