@@ -86,6 +86,9 @@ jobs:
         run: |
           mkdir -p ./vpn-config
 
+          sudo ip route add 192.168.0.0/24 via 192.168.0.1 dev eth0
+          sudo ip route add default via 192.168.0.1 dev eth0
+
           cat > ./vpn-config/xl2tpd.conf <<EOF
           [lac myvpn]
           lns = $VPN_SERVER_IP
@@ -128,10 +131,6 @@ jobs:
 
       - name: Verify VPN connection
         run: |
-          sleep 10
-
-          
-
           ip a
           ip route
 
