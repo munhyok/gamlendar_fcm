@@ -52,9 +52,9 @@ def message_template(gameList):
     length = len(gameList)
     
     if length == 1:
-        return f"{gameList[0]} 출시"
+        return f"{gameList[0]}"
     
-    return f"{gameList[0]}외 {length-1}개의 게임 출시"
+    return f"{gameList[0]} 외 {length-1}개의 게임"
     
 
 def notification_message(user_id, gameList):
@@ -62,7 +62,7 @@ def notification_message(user_id, gameList):
     message = messaging.Message(
         topic=user_id,
         notification=messaging.Notification(
-            title='겜린더 출시 알림',
+            title='게임 출시 알림',
             body=message_template(gameList)
         ),
         
