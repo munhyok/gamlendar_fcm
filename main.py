@@ -79,7 +79,7 @@ def notification_message(user_id, gameList):
 def send_all_msg(messageList):
     
     try:
-        response = messaging.send_each(messageList, dry_run=True)
+        response = messaging.send_each(messageList, dry_run=False)
         print(f"Successfully sent {response.success_count} messages")
         print(f"Failed to send {response.failure_count} messages")
 
@@ -99,6 +99,7 @@ def main():
     messageList = []
     
     today = initializeToday()
+    print(f"오늘 날짜: {today}")
     initializeFirebase()
     
     redis_isconnect = reDB.ping()
@@ -112,10 +113,10 @@ def main():
         for key, value in msg.items():
             #print(f"{key}: {value}")    
             message = notification_message(key, value)
-            print(f"Generated Message: {message}")
+            #print(f"Generated Message: {message}")
             messageList.append(message)
     
-    print(messageList)
+    #print(messageList)
     send_all_msg(messageList)
 
 
