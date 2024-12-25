@@ -89,7 +89,7 @@ def send_all_msg(messageList):
             else:
                 print(f"Message {i+1}: Failed - {resp.exception}")
     except:
-        print('error 메시지 전송 실패 다시 시도해주세요')
+        print('알림 전송할 유저가 없습니다...')
         
         
 

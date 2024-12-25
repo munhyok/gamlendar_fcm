@@ -129,11 +129,13 @@ jobs:
           sleep 10
           
 
+      # 보안 이슈로 인한 ip 명령어 주석처리 기존 Workflow는 전부 삭제
       - name: Verify VPN connection
         run: |
-          sudo route add -host ${{secrets.REDIS_CACHE_HOST}} gw 192.168.0.1
-          ip a
-          ip route
+          sudo route add -host ${{ secrets.REDIS_CACHE_HOST }} gw ${{ secrets.ROUTE_GATEWAY }}
+          
+      #    ip a
+      #    ip route
 
       
 
