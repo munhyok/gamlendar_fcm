@@ -6,12 +6,7 @@ on:
   schedule:
     - cron: "0 0 * * *" # 매일 오전 9시 실행
   
-env:
-  WIREGUARD_PRIVATE_KEY: ${{ secrets.WIREGUARD_PRIVATE_KEY }}
-  WIREGUARD_PUBLIC_KEY: ${{ secrets.WIREGUARD_PUBLIC_KEY }}
-  WIREGUARD_ENDPOINT: ${{ secrets.WIREGUARD_ENDPOINT }}
-  WIREGUARD_IP_ADDRESS: ${{ secrets.WIREGUARD_IP_ADDRESS }}
-  WIREGUARD_GATEWAY: ${{ secrets.WIREGUARD_GATEWAY }}
+
 
 jobs:
   run_python_script:
@@ -42,11 +37,21 @@ jobs:
 
 
       - name: Setup Wireguard
+        env:
+          WIREGUARD_PRIVATE_KEY: ${{ secrets.WIREGUARD_PRIVATE_KEY }}
+          WIREGUARD_PUBLIC_KEY: ${{ secrets.WIREGUARD_PUBLIC_KEY }}
+          WIREGUARD_ENDPOINT: ${{ secrets.WIREGUARD_ENDPOINT }}
+          WIREGUARD_IP_ADDRESS: ${{ secrets.WIREGUARD_IP_ADDRESS }}
+          WIREGUARD_GATEWAY: ${{ secrets.WIREGUARD_GATEWAY }}
         run: |
+
+          echo "$WIREGUARD_PRIVATE_KEY" > privatekey
+          chmod 600 privatekey
+
           sudo ip link add dev wg0 type wireguard
           sudo ip address add dev wg0 $WIREGUARD_IP_ADDRESS peer $WIREGUARD_GATEWAY
 
-          sudo wg set wg0 listen-port 48123 private-key $WIREGUARD_PRIVATE_KEY peer $WIREGUARD_PUBLIC_KEY allowed-ips 0.0.0.0/0 endpoint $WIREGUARD_ENDPOINT
+          sudo wg set wg0 listen-port 48123 private-key privatekey peer $WIREGUARD_PUBLIC_KEY allowed-ips 0.0.0.0/0 endpoint $WIREGUARD_ENDPOINT
         
           sudo ip link set up dev wg0
 
