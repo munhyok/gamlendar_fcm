@@ -32,9 +32,9 @@ jobs:
 
 
       - name: Set up WireGuard Connection
-          uses: niklaskeerl/easy-wireguard-action@v2
-          with:
-            WG_CONFIG_FILE: ${{ secrets.WG_CONFIG_FILE }}
+        uses: niklaskeerl/easy-wireguard-action@v2
+        with:
+          WG_CONFIG_FILE: ${{ secrets.WG_CONFIG_FILE }}
 
       
       - name: check wireguard started
