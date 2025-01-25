@@ -22,122 +22,34 @@ jobs:
         with:
           python-version: '3.x'
 
-      # 의존성 설치
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Set up strongSwan dependencies
+      - name: Install Wireguard
         run: |
           sudo apt-get update
-          sudo apt-get -y install strongswan xl2tpd
+          sudo apt install wireguard
 
-      - name: Configure strongSwan
-        env:
-          VPN_SERVER_IP: ${{ secrets.VPN_SERVER }}
-          VPN_PSK: ${{ secrets.VPN_PSK }}
+      - name: Initialize secrets key
         run: |
-          mkdir -p ./vpn-config
+          echo "${{ secrets.WIREGUARD_PRIVATE_KEY }}" > privatekey
+          echo "${{ secrets.WIREGUARD_PUBLIC_KEY }}" > publickey
+          echo "${{ secrets.WIREGUARD_ENDPOINT }}" > wg_endpoint
+          echo "${{ secrets.WIREGUARD_IP_ADDRESS }}" > wg_ipAddress
+          echo "${{ secrets.WIREGUARD_GATEWAY }}" > wg_gateway
 
-          
-
-          cat > ./vpn-config/ipsec.conf <<EOF
-          # ipsec.conf - strongSwan IPsec configuration file
-
-          config setup
-
-          conn %default
-            ikelifetime=60m
-            keylife=20m
-            rekeymargin=3m
-            keyingtries=1
-            keyexchange=ikev1
-            authby=secret
-            ike=aes256-sha1-modp2048,aes128-sha1-modp2048!
-            esp=aes256-sha1-modp2048,aes128-sha1-modp2048!
-
-          conn myvpn
-            keyexchange=ikev1
-            left=%defaultroute
-            auto=add
-            authby=secret
-            type=transport
-            leftprotoport=17/1701
-            rightprotoport=17/1701
-            right=$VPN_SERVER_IP
-          EOF
-
-          cat > ./vpn-config/ipsec.secrets <<EOF
-          : PSK "$VPN_PSK"
-          EOF
-
-          
-          sudo cp ./vpn-config/ipsec.conf /etc/ipsec.conf
-          sudo cp ./vpn-config/ipsec.secrets /etc/ipsec.secrets
-          sudo chmod 600 /etc/ipsec.secrets
-          sudo systemctl restart ipsec
-
-          sleep 10
-
-      - name: Configure xl2tpd
-        env:
-          VPN_SERVER_IP: ${{ secrets.VPN_SERVER }}
-          VPN_USER: ${{ secrets.VPN_USERNAME }}
-          VPN_PASSWORD: ${{ secrets.VPN_PASSWORD }}
+      - name: Setup Wireguard
         run: |
-          mkdir -p ./vpn-config
+          sudo ip link add dev wg0 type wireguard
+          sudo ip address add dev wg0 wg_ipAddress peer wg_gateway
 
-          
-          cat > ./vpn-config/xl2tpd.conf <<EOF
-          [lac myvpn]
-          lns = $VPN_SERVER_IP
-          ppp debug = yes
-          pppoptfile = /etc/ppp/options.l2tpd.client
-          length bit = yes
-          EOF
+          sudo wg set wg0 listen-port 48123 private-key privatekey peer publickey allowed-ips 0.0.0.0/0 endpoint wg_endpoint
+        
+          sudo ip link set up dev wg0
 
-          cat > ./vpn-config/options.l2tpd.client <<EOF
-          ipcp-accept-local
-          ipcp-accept-remote
-          refuse-eap
-          require-chap
-          noccp
-          noauth
-          mtu 1280
-          mru 1280
-          defaultroute
-          usepeerdns
-          connect-delay 5000
-          name $VPN_USER
-          password $VPN_PASSWORD
-          EOF
-
-          
-          sudo cp ./vpn-config/xl2tpd.conf /etc/xl2tpd/xl2tpd.conf
-          sudo cp ./vpn-config/options.l2tpd.client /etc/ppp/options.l2tpd.client
-          sudo chmod 600 /etc/ppp/options.l2tpd.client
-          sudo systemctl restart xl2tpd
-
-          sleep 10
-
-
-      - name: Start VPN connection
-        run: |
-          
-          echo "c myvpn" | sudo tee /var/run/xl2tpd/l2tp-control
-          sleep 10
-          
-
-      # 보안 이슈로 인한 ip 명령어 주석처리 기존 Workflow는 전부 삭제
-      - name: Verify VPN connection
-        run: |
-          sudo route add -host ${{ secrets.REDIS_CACHE_HOST }} gw ${{ secrets.ROUTE_GATEWAY }}
-          
-      #    ip a
-      #    ip route
-
-      
 
       - name: create-json
         id: create-json

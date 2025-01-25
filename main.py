@@ -33,6 +33,8 @@ def id_game_prefix(user_gameList: list):
         
         id = user_id.split(':')
         id = id[1]
+        
+        # user_id별 달력에 저장한 게임 목록 불러오기
         game_dict = reDB.hscan(user_id)[1]
         
         gameList = game_dict.values()
@@ -58,7 +60,7 @@ def message_template(gameList):
     
 
 def notification_message(user_id, gameList):
-    #user_id = '6734525a07d64cce967f3280' # Test, Live에선 주석 처리
+    user_id = '6747640125dad51236dec3af' # Test용도, Live에선 주석 처리
     message = messaging.Message(
         topic=user_id,
         notification=messaging.Notification(
