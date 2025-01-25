@@ -29,18 +29,13 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Install Wireguard
-        run: |
-          sudo apt-get update
-          sudo apt install wireguard
-
 
 
       - name: Set up WireGuard Connection
-      uses: niklaskeerl/easy-wireguard-action@v2
-      with:
-        WG_CONFIG_FILE: ${{ secrets.WG_CONFIG_FILE }}
-        
+          uses: niklaskeerl/easy-wireguard-action@v2
+          with:
+            WG_CONFIG_FILE: ${{ secrets.WG_CONFIG_FILE }}
+
       
       - name: check wireguard started
         run: ip link show wg0
