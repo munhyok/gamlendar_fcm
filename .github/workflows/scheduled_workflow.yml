@@ -54,6 +54,9 @@ jobs:
           sudo wg set wg0 listen-port 48123 private-key privatekey peer $WIREGUARD_PUBLIC_KEY allowed-ips 0.0.0.0/0 endpoint $WIREGUARD_ENDPOINT
         
           sudo ip link set up dev wg0
+      
+      - name: check wireguard started
+        run: ip link show wg0
 
 
       - name: create-json
