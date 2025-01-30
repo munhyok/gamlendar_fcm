@@ -6,7 +6,7 @@ on:
 
   push:
     branches:
-      - main
+      - main 
   schedule:
     - cron: "0 0 * * *" # 매일 오전 9시 실행
   
@@ -35,16 +35,11 @@ jobs:
 
 
 
-      - name: Save Default Gateway
-        run: echo "$(ip route show default | awk '{print $3}')" > default_gw.txt
-
       - name: Set up WireGuard Connection
         uses: niklaskeerl/easy-wireguard-action@v2
         with:
             WG_CONFIG_FILE: ${{ secrets.WG_CONFIG_FILE }}
 
-      - name: Restore Default Route
-        run: sudo ip route add default via $(cat default_gw.txt)
 
 
       
