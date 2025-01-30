@@ -36,7 +36,10 @@ jobs:
         run: |
           echo "${{ secrets.WG_CONFIG_FILE }}" | sudo tee /etc/wireguard/wg0.conf > /dev/null
           sudo chmod 600 /etc/wireguard/wg0.conf
-          sudo wg-quick up wg0
+          nohup sudo wg-quick up wg0 > wireguard.log 2>&1 &
+          sleep 10  
+          cat wireguard.log 
+
 
       - name: Restore Default Route
         run: sudo ip route add default via $(cat default_gw.txt)
