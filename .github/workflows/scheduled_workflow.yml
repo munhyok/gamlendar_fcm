@@ -1,12 +1,9 @@
 name: Gamlendar Game Notification Workflow
 
 on:
-  
   workflow_dispatch: # 수동 실행
   schedule:
     - cron: "0 0 * * *" # 매일 오전 9시 실행
-  
-
 
 jobs:
   run_python_script:
@@ -23,45 +20,50 @@ jobs:
         with:
           python-version: '3.x'
 
-      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # WireGuard 설치 및 설정
+      - name: Install WireGuard
+        run: sudo apt update && sudo apt install -y wireguard resolvconf
 
+      - name: Save Default Gateway
+        run: echo "$(ip route show default | awk '{print $3}')" > default_gw.txt
 
       - name: Set up WireGuard Connection
-        uses: niklaskeerl/easy-wireguard-action@v2
-        with:
-          WG_CONFIG_FILE: ${{ secrets.WG_CONFIG_FILE }}
+        run: |
+          echo "${{ secrets.WG_CONFIG_FILE }}" | sudo tee /etc/wireguard/wg0.conf > /dev/null
+          sudo chmod 600 /etc/wireguard/wg0.conf
+          sudo wg-quick up wg0
 
-      
-      - name: check wireguard started
+      - name: Restore Default Route
+        run: sudo ip route add default via $(cat default_gw.txt)
+
+      - name: Configure DNS for WireGuard
+        run: sudo systemctl restart systemd-resolved
+
+      - name: Check WireGuard started
         run: ip link show wg0
 
-
-      - name: create-json
+      - name: Create JSON
         id: create-json
         uses: jsdaniell/create-json@1.1.2
         with:
           name: "serviceAccountKey.json"
           json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
 
-
-      - name: wait 10 sec
-        run: |
-          sleep 10
+      - name: Wait 10 sec
+        run: sleep 10
 
       # main.py 실행
       - name: Run Python script
         env:
-          REDIS_CACHE_HOST: ${{secrets.REDIS_CACHE_HOST}}
-          REDIS_CACHE_PORT: ${{secrets.REDIS_CACHE_PORT}}
-          REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD}}
-        
-        run: |
-          python main.py
+          REDIS_CACHE_HOST: ${{ secrets.REDIS_CACHE_HOST }}
+          REDIS_CACHE_PORT: ${{ secrets.REDIS_CACHE_PORT }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        run: python main.py
 
       - name: Remove serviceAccountKey
         run: rm -rf serviceAccountKey.json
