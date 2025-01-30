@@ -4,9 +4,6 @@ on:
   
   workflow_dispatch: # 수동 실행
 
-  push:
-    branches:
-      - main 
   schedule:
     - cron: "0 0 * * *" # 매일 오전 9시 실행
   
