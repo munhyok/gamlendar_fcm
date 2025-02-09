@@ -14,13 +14,14 @@ Redis에 있는 내용들을 정리해 가져와서 푸시 알림으로 전송�
 
 ## 과정
 ### 1. 파이썬 설치
+
 ### 2. requirements.txt에 있는 의존성 설치
 
-### 3. StrongSwan & xl2tpd 설치
+### 3. Wireguard 설치
 
-### 4. strongSwan & xl2tpd 초기 설정
+### 4. Wireguard config 생성
 
-### 5. VPN 시작 및 Routing Table 추가
+### 5. Wireguard 연결
 
 ### 6. Firebase Service Account.json 추가
 
