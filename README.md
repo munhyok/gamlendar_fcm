@@ -12,7 +12,17 @@ Redis에 있는 내용들을 정리해 가져와서 푸시 알림으로 전송�
 ## Status
 [![Gamlendar Game Notification Workflow](https://github.com/munhyok/gamlendar_fcm/actions/workflows/scheduled_workflow.yml/badge.svg)](https://github.com/munhyok/gamlendar_fcm/actions/workflows/scheduled_workflow.yml)
 
-## 과정
+## 설계
+### 전체 흐름도
+![](/readme%20image/push%20noti%20flow.png)
+
+### 이전 설계
+![](/readme%20image/Previous%20Architecture.png)
+
+### 개선 설계
+![](/readme%20image/Refined%20Architecture.png)
+
+## Workflow 과정
 ### 1. 파이썬 설치
 
 ### 2. requirements.txt에 있는 의존성 설치
