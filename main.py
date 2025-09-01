@@ -118,7 +118,7 @@ def main():
             #print(f"Generated Message: {message}")
             messageList.append(message)
     
-    #print(messageList)
+    
     send_all_msg(messageList)
 
 
