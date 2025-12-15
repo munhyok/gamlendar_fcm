@@ -20,12 +20,13 @@ def initializeFirebase():
 
 
 def key_prefix_dateList(date):
+    # 오늘 날짜를 넣으면 user_id 목록 출력
     key_prefix = reDB.keys(f"{date}:*") 
     
     return key_prefix
 
 def id_game_prefix(user_gameList: list):
-    #print(len(user_gameList))
+    # 유저 별로 등록한 게임을 불러옵니다
     
     prefix_list = []
     
@@ -45,7 +46,6 @@ def id_game_prefix(user_gameList: list):
         
         prefix_list.append(id_list_prefix)
         
-        #print(id_list_prefix)
         
     return prefix_list
         
